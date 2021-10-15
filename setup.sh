@@ -6,6 +6,6 @@ email = lpr.cid20@uea.edu.br
 
 echo "[server]
 headless = true
-enableCORS=false
+enableCORS = false
 port = $PORT
 " > ~/.streamlit/config.toml
