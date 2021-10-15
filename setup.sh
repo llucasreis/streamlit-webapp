@@ -1,11 +1,7 @@
-mkdir -p ~/.streamlit/
-
-echo "[general]
-email = lpr.cid20@uea.edu.br
-" > ~/.streamlit/credentials.toml
+mkdir -p ~/.streamlit
 
 echo "[server]
 headless = true
-enableCORS=false
+enableCORS = false
 port = $PORT
 " > ~/.streamlit/config.toml
