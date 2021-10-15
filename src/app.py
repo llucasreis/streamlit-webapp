@@ -1,56 +1,84 @@
 import streamlit as st
+from streamlit.elements.alert import AlertMixin
 import json
 
 from client.azure import Azure
 
-st.title("Lung Cancer Classification")
+st.title("Lung Cancer Prediction")
+st.markdown("Este é um Data App para Diagnóstico preditivo de Câncer de Pulmão")
+st.markdown("Desenvolvido pelos alunos: Andrea Mendonça, Francisco Marcelo, Lucas Pereira e Marcos Wenneton " \
+            "para a discplina de Infraestrutura em Nuvem para Projetos com Ciência dos Dados do curso de Pós-Graduação "\
+            "em Ciência de Dados da Universidade do Estado do Amazonas - UEA.")
 
-gender = st.text_input("Gender", key="Col1", value="M")
-age = st.text_input("Age", key="Col2", value="1")
-smoking = st.text_input("Smoking", key="Col3", value="1")
-yellow_fingers = st.text_input("Yellow Fingers", key="Col4", value="1")
-anxiety = st.text_input("Anxiety", key="Col5", value="1")
-peer_pressure = st.text_input("Peer Presure", key="Col6", value="1")
-chronic_disease = st.text_input("Chronic Disease", key="Col7", value="1")
-fatigue = st.text_input("Fatigue", key="Col8", value="1")
-allergy = st.text_input("Allergy", key="Col9", value="1")
-wheezing = st.text_input("Wheezing", key="Col10", value="1")
-alcohol_consuming = st.text_input("Alcohol Consuming", key="Col11", value="1")
-coughing = st.text_input("Coughing", key="Col12", value="1")
-shortness_of_breath = st.text_input("Shortness of Breath", key="Col13", value="1")
-swallowing_difficulty = st.text_input("Swallowing Difficulty", key="Col14", value="1")
-chest_pain = st.text_input("Chest Pain", key="Col15", value="1")
+gender = st.selectbox("Gênero", ('Feminino', 'Masculino'), key="gender",)
+age = st.text_input("Idade", key="age", value="1")
+smoking = st.checkbox("Fumante", key="smoking")
+yellow_fingers = st.checkbox("Dedos amarelados", key="yellow_fingers")
+anxiety = st.checkbox("Ansiedade", key="anxiety")
+peer_pressure = st.checkbox("Pressão dos pares", key="peer_pressure")
+chronic_disease = st.checkbox("Doença Crônica", key="chronic_disease")
+fatigue = st.checkbox("Fadiga", key="fatigue")
+allergy = st.checkbox("Alergia", key="allergy")
+wheezing = st.checkbox("Respiração Ofegante", key="wheezing")
+alcohol_consuming = st.checkbox("Toma bebida alcólica", key="alcohol_consuming")
+coughing = st.checkbox("Tosse", key="coughing")
+shortness_of_breath = st.checkbox("Falta de ar", key="shortness_of_breath")
+swallowing_difficulty = st.checkbox("Dificuldade para engolor", key="swallowing_difficulty")
+chest_pain = st.checkbox("Dores no peito", key="chest_pain")
 
 btn_predict = st.button("Realizar Previsão")
+
+def normalize_option(option):
+  if option:
+    return 2
+  else:
+    return 1
+
+def normalize_gender(option):
+  if option == 'Feminino':
+    return 1
+  else:
+    return 2
+
+def show_results(response):
+  result = response['Results']['output1'][0]['Scored Labels']
+  if result == 'NO':
+    st.success("NEGATIVO: Aparentemente está tudo bem com você :)")
+  elif result == 'YES':
+    st.error("POSITIVO: Talvez seja bom consultar um médico :|")
+
+  st.warning("ATENÇÃO! O resultado acima é apenas um experimento acadêmico, procure um médico caso não esteja se sentido bem! :)")
+
 
 if btn_predict:
   azure = Azure()
 
   st_input = {
-    "Inputs": {
-      "input1": [
-        {
-          'GENDER': gender,
-          'AGE': age,
-          'SMOKING': smoking,
-          'YELLOW_FINGERS': yellow_fingers,
-          'ANXIETY': anxiety,   
-          'PEER_PRESSURE': peer_pressure,   
-          'CHRONIC DISEASE': chronic_disease,   
-          'FATIGUE': fatigue,   
-          'ALLERGY': allergy,   
-          'WHEEZING': wheezing,   
-          'ALCOHOL CONSUMING': alcohol_consuming,   
-          'COUGHING': coughing,   
-          'SHORTNESS OF BREATH': shortness_of_breath,   
-          'SWALLOWING DIFFICULTY': swallowing_difficulty,   
-          'CHEST PAIN': chest_pain,   
-          'LUNG_CANCER': "",
-        }
-      ]
-    },
-    "GlobalParameters": {
-    }
+      "Inputs": {
+          "input1":
+          [
+              {
+                  'GENDER': gender,
+                  'AGE': age,
+                  'SMOKING': normalize_option(smoking),
+                  'YELLOW_FINGERS': normalize_option(yellow_fingers),
+                  'ANXIETY': normalize_option(anxiety),
+                  'PEER_PRESSURE': normalize_option(peer_pressure),
+                  'CHRONIC DISEASE': normalize_option(chronic_disease),
+                  'FATIGUE': normalize_option(fatigue),
+                  'ALLERGY': normalize_option(allergy),
+                  'WHEEZING': normalize_option(wheezing),
+                  'ALCOHOL CONSUMING': normalize_option(alcohol_consuming),
+                  'COUGHING': normalize_option(coughing),
+                  'SHORTNESS OF BREATH': normalize_option(shortness_of_breath),
+                  'SWALLOWING DIFFICULTY': normalize_option(swallowing_difficulty),
+                  'CHEST PAIN': normalize_option(chest_pain),
+                  'LUNG_CANCER': "",
+              }
+          ],
+      },
+      "GlobalParameters":  {
+      }
   }
 
   data = str.encode(json.dumps(st_input))
@@ -59,6 +87,7 @@ if btn_predict:
     response = azure.predict(data)
 
     print(response)
-    st.markdown(response)
+    #st.markdown(response)
+    show_results(response)
   except Exception as e:
     print("Exception: ", e)
