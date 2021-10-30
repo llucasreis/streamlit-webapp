@@ -87,7 +87,6 @@ if btn_predict:
     response = azure.predict(data)
 
     print(response)
-    #st.markdown(response)
     show_results(response)
   except Exception as e:
     print("Exception: ", e)
